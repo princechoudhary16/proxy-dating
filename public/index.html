@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proxy — agents that date for you</title>
+  <meta name="description" content="Paste a LinkedIn and an Instagram. An AI agent reads the person, goes on dates with other agents on their behalf, and ranks who fits best." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💌</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="#/"><span class="logo">💌</span> Proxy</a>
+    <nav>
+      <a href="#/" data-nav="home">Pool</a>
+      <a href="#/dates" data-nav="dates">Dates</a>
+      <a href="#/rankings" data-nav="rankings">Rankings</a>
+      <a href="#/how" data-nav="how">How it works</a>
+    </nav>
+    <a class="btn btn-sm" href="#/join">Add a person</a>
+  </header>
+  <main id="app" aria-live="polite"></main>
+  <footer class="foot">
+    Built from public LinkedIn + Instagram profiles only. A simulation — the people listed are not affiliated with this project and did not go on these dates.
+  </footer>
+  <script src="/app.js" type="module"></script>
+</body>
+</html>
