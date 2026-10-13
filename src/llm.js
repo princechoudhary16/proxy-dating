@@ -25,10 +25,10 @@ const limit = pLimit(config.llmConcurrency);
  * `content` may be a string or an array of content blocks (text + images).
  */
 export function structured({ system, content, schema, effort = 'medium', maxTokens = 16000, role = 'analysis' }) {
-  return limit(() => provider().structured({ model: config.models[role], system, content, schema, effort, maxTokens }));
+  return limit(() => provider().structured({ role, model: config.models[role], system, content, schema, effort, maxTokens }));
 }
 
 /** Plain conversational turn. `messages` must already alternate user/assistant. */
 export function chat({ system, messages, effort = 'low', maxTokens = 4000, role = 'date' }) {
-  return limit(() => provider().chat({ model: config.models[role], system, messages, effort, maxTokens }));
+  return limit(() => provider().chat({ role, model: config.models[role], system, messages, effort, maxTokens }));
 }
