@@ -6,7 +6,12 @@ import { sleep } from '../util.js';
 // Input-tokens-per-minute budget per model (Anthropic rate limits are ITPM-based). Estimate ~4 chars/token.
 const ITPM = Number(process.env.ANTHROPIC_ITPM) || 380_000;
 const spent = new Map(); // model -> [{ t, tokens }]
-const estimate = (x) => Math.ceil(JSON.stringify(x).replace(/"data":"[^"]+"/g, '"data":"x".repeat(6000)').length / 4);
+const IMAGE_TOKENS = 1600;
+const estimate = (x) => {
+  const json = JSON.stringify(x);
+  const images = (json.match(/"type":"image"/g) || []).length;
+  return Math.ceil(json.replace(/"data":"[^"]+"/g, '').length / 4) + images * IMAGE_TOKENS;
+};
 
 async function budget(model, tokens) {
   const w = spent.get(model) ?? spent.set(model, []).get(model);
