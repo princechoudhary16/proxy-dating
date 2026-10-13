@@ -40,7 +40,7 @@ const dateSummary = (d) => ({
 const findDate = (id) => [...store.dates.values()].find((d) => d.id === id);
 
 app.get('/api/health', (_req, res) =>
-  res.json({ ok: true, llm: !!config.anthropicKey, apify: !!config.apifyToken, model: config.model, people: store.people.size, dates: store.dates.size })
+  res.json({ ok: true, llm: !!(config.anthropicKey || config.gemini.key), provider: config.provider, models: config.models, apify: !!config.apifyToken, people: store.people.size, dates: store.dates.size })
 );
 
 app.get('/api/people', (_req, res) =>
@@ -87,7 +87,7 @@ app.post('/api/onboard', throttle, (req, res) => {
   } catch (e) {
     return res.status(400).json({ error: e.message });
   }
-  if (!config.anthropicKey) return res.status(503).json({ error: 'The server has no ANTHROPIC_API_KEY configured.' });
+  if (!config.anthropicKey && !config.gemini.key) return res.status(503).json({ error: 'The server has no LLM key configured.' });
   const job = startJob('onboard', { linkedin, instagram }, (emit) => onboard({ linkedinUrl: linkedin, instagramUrl: instagram }, emit));
   res.status(202).json({ jobId: job.id });
 });
@@ -116,5 +116,5 @@ app.use(express.static(pub, { maxAge: '5m' }));
 app.get('/{*path}', (_req, res) => res.sendFile(path.join(pub, 'index.html')));
 
 app.listen(config.port, () =>
-  console.log(`Proxy listening on :${config.port} — ${store.people.size} people, ${store.dates.size} dates (llm=${!!config.anthropicKey}, apify=${!!config.apifyToken})`)
+  console.log(`Proxy listening on :${config.port} — ${store.people.size} people, ${store.dates.size} dates (llm=${config.provider}, apify=${!!config.apifyToken})`)
 );

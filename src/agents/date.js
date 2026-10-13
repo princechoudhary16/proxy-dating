@@ -32,6 +32,7 @@ export function planDate(a, b) {
     schema: PlanSchema,
     effort: 'low',
     maxTokens: 4000,
+    role: 'date',
   });
 }
 
@@ -107,6 +108,7 @@ export function debrief(self, other, plan, transcript, selfKey) {
     schema: DebriefSchema,
     effort: 'low',
     maxTokens: 4000,
+    role: 'date',
   });
 }
 
