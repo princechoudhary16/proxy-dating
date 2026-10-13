@@ -233,7 +233,7 @@ async function run(jobId) {
       renderSteps();
     } else if (e.type === 'profile') {
       personId = e.person.id;
-      P[personId] = { name: e.person.name, id: personId };
+      P[personId] = e.person;
       cache.clear();
       document.getElementById('run-cta').innerHTML = `<a class="btn btn-ghost btn-sm" href="#/p/${personId}">Open profile →</a>`;
     } else if (e.type === 'date:start') {

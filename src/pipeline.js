@@ -102,7 +102,7 @@ export async function onboard(links, emit) {
   const person = await buildPerson(links, { emit });
   store.upsertPerson(person);
   store.saveRuntime();
-  emit({ type: 'profile', person: { id: person.id, name: person.name } });
+  emit({ type: 'profile', person: { id: person.id, name: person.name, avatar: person.avatar } });
 
   const others = [...store.people.values()].filter((p) => p.id !== person.id);
   if (others.length) {
