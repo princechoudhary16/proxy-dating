@@ -1,0 +1,21 @@
+{
+  "name": "proxy-dating",
+  "version": "1.0.0",
+  "description": "Agentic dating: every person is represented by an AI agent that reads their LinkedIn + Instagram, goes on dates with other agents, and ranks who fits best.",
+  "type": "module",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch --env-file-if-exists=.env server.js",
+    "seed": "node --env-file-if-exists=.env scripts/seed.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "express": "^5.3.0",
+    "zod": "^4.6.7"
+  }
+}
