@@ -82,12 +82,11 @@ export async function runDate(a, b, { onMessage = () => {}, onPlan = () => {} } 
 /** Build an alternating user/assistant history from one agent's point of view. */
 function toMessages(transcript, me, opener, isLast) {
   const msgs = [];
-  const wrap = (t) => t;
   if (me === 'a') msgs.push({ role: 'user', content: `${opener} You arrive first. Open the date.` });
   for (const line of transcript) {
     const role = line.speaker === me ? 'assistant' : 'user';
     const prev = msgs[msgs.length - 1];
-    let content = wrap(line.text);
+    let content = line.text;
     if (!msgs.length) content = `${opener} Your date says:\n${content}`;
     if (prev && prev.role === role) prev.content += `\n${content}`;
     else msgs.push({ role, content });
