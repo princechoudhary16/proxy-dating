@@ -10,7 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { config } from '../src/config.js';
 import { store } from '../src/store.js';
-import { scrapePerson } from '../src/scrape/index.js';
+import { scrapePerson, identityCheck } from '../src/scrape/index.js';
 import { buildPerson, screenAll, selectPairs, runDates } from '../src/pipeline.js';
 import { pLimit } from '../src/util.js';
 
@@ -39,6 +39,7 @@ await Promise.all(
           );
           fs.writeFileSync(cacheFile, JSON.stringify(sources));
         }
+        sources.identity = identityCheck(sources.linkedin, sources.instagram, sources.handles.linkedin); // re-check cached data with current rules
         if (!sources.identity.verified) throw new Error(`identity not verified (${sources.identity.reason})`);
         if (args.has('--scrape-only')) return log(`✓ scraped ${sources.linkedin.name} / @${sources.instagram.username}`);
         const person = await buildPerson(null, { sources, origin: 'seed' });
