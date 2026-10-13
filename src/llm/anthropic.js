@@ -1,6 +1,23 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import { config } from '../config.js';
+import { sleep } from '../util.js';
+
+// Input-tokens-per-minute budget per model (Anthropic rate limits are ITPM-based). Estimate ~4 chars/token.
+const ITPM = Number(process.env.ANTHROPIC_ITPM) || 380_000;
+const spent = new Map(); // model -> [{ t, tokens }]
+const estimate = (x) => Math.ceil(JSON.stringify(x).replace(/"data":"[^"]+"/g, '"data":"x".repeat(6000)').length / 4);
+
+async function budget(model, tokens) {
+  const w = spent.get(model) ?? spent.set(model, []).get(model);
+  for (;;) {
+    const now = Date.now();
+    while (w.length && now - w[0].t > 60_000) w.shift();
+    const used = w.reduce((s, e) => s + e.tokens, 0);
+    if (used + tokens <= ITPM || !w.length) return void w.push({ t: now, tokens });
+    await sleep(60_000 - (now - w[0].t) + 50);
+  }
+}
 
 let client;
 function getClient() {
@@ -17,6 +34,7 @@ function assertUsable(res) {
 }
 
 export async function structured({ model, system, content, schema, effort, maxTokens }) {
+  await budget(model, estimate([system, content]));
   const res = await getClient().messages.parse({
     model,
     max_tokens: maxTokens,
@@ -30,6 +48,7 @@ export async function structured({ model, system, content, schema, effort, maxTo
 }
 
 export async function chat({ model, system, messages, effort, maxTokens }) {
+  await budget(model, estimate([system, messages]));
   const res = await getClient().messages.create({ model, max_tokens: maxTokens, system, messages, output_config: { effort } });
   assertUsable(res);
   return res.content
