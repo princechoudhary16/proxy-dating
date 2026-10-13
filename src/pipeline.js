@@ -5,7 +5,7 @@ import { screenCandidates } from './agents/screen.js';
 import { goOnDate } from './agents/date.js';
 import { screenScore } from './ranking.js';
 import { config } from './config.js';
-import { slugify } from './util.js';
+import { slugify, pLimit } from './util.js';
 
 /** Inline the Instagram avatar so the page never depends on expiring CDN links. */
 async function avatarDataUri(url) {
@@ -74,8 +74,10 @@ export function selectPairs(focusIds, k = config.datesPerPerson) {
 
 /** Step 3b: send agents on dates in parallel, streaming every line. */
 export async function runDates(pairs, emit = () => {}) {
+  // Cap simultaneous dates so they finish progressively instead of all crawling forward together.
+  const limit = pLimit(config.dateConcurrency);
   await Promise.all(
-    pairs.map(async ([aId, bId]) => {
+    pairs.map(([aId, bId]) => limit(async () => {
       const a = store.people.get(aId);
       const b = store.people.get(bId);
       const id = `${a.id}__${b.id}`;
@@ -91,7 +93,7 @@ export async function runDates(pairs, emit = () => {}) {
       } catch (e) {
         emit({ type: 'date:error', id, error: e.message });
       }
-    })
+    }))
   );
 }
 

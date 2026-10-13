@@ -42,3 +42,17 @@ FRICTIONS: ${a.frictions.join('; ')}
 DEALBREAKERS: ${a.dealbreakers.join('; ')}
 VOICE: ${a.voice}`;
 }
+
+/** What an agent knows about its date: the public-facing read, not the other agent's private dossier. */
+export function publicProfile(p) {
+  const a = p.analysis;
+  const labels = (arr, n = 5) => (arr || []).slice(0, n).map((x) => x.label).join(', ');
+  return `NAME: ${p.name}
+HEADLINE: ${p.headline || ''}${p.location ? ` (${p.location})` : ''}
+TAGLINE: ${a.tagline}
+SUMMARY: ${a.summary}
+HOBBIES: ${labels(a.hobbies)}
+INTERESTS: ${labels(a.interests)}
+LIFESTYLE: ${a.lifestyle.tags.join(', ')}
+CONVERSATION STARTERS: ${a.conversationStarters.join(' | ')}`;
+}

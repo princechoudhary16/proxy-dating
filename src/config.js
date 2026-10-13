@@ -41,6 +41,7 @@ export const config = {
   dateEffort: process.env.DATE_EFFORT || 'low',
   datesPerPerson: int(process.env.DATES_PER_PERSON, 4),
   dateTurns: int(process.env.DATE_TURNS, 8),
+  dateConcurrency: int(process.env.DATE_CONCURRENCY, 6),
   llmConcurrency: int(process.env.LLM_CONCURRENCY, 8),
   maxConcurrentJobs: int(process.env.MAX_CONCURRENT_JOBS, 2),
   apify: {

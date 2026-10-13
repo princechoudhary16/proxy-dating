@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { structured, chat } from '../llm.js';
-import { dossier } from './persona.js';
+import { dossier, publicProfile } from './persona.js';
 import { config } from '../config.js';
 
 const PlanSchema = z.object({
@@ -28,7 +28,7 @@ const DebriefSchema = z.object({
 export function planDate(a, b) {
   return structured({
     system: `You are the dating agent for ${a.name}. You are planning a first date with ${b.name}. Pick something that ${a.name} would genuinely enjoy and that also suits ${b.name}, based only on what you know of each.`,
-    content: `YOUR PERSON:\n${dossier(a)}\n\nTHEIR PROFILE:\n${dossier(b)}`,
+    content: `YOUR PERSON:\n${dossier(a)}\n\nTHEIR PROFILE:\n${publicProfile(b)}`,
     schema: PlanSchema,
     effort: 'low',
     maxTokens: 4000,
@@ -44,7 +44,7 @@ WHO YOU ARE (from your analysis of ${self.name}'s LinkedIn and Instagram):
 ${dossier(self)}
 
 WHAT YOU KNOW ABOUT YOUR DATE (their public profile):
-${dossier(other)}
+${publicProfile(other)}
 
 THE DATE: ${plan.activity} at ${plan.venue} (${plan.vibe}).
 This is a hypothetical compatibility simulation: act as if ${self.name} is single and open to meeting someone. Do not mention any real-life partner or spouse.
