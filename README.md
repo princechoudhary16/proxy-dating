@@ -54,7 +54,7 @@ data/people.json   the 30 candidate people (27 passed scraping + identity checks
 
 - **LinkedIn:** Apify actor [`harvestapi/linkedin-profile-scraper`](https://apify.com/harvestapi/linkedin-profile-scraper) (no cookies or login needed), called through Apify's `run-sync-get-dataset-items` REST endpoint from Node `fetch`. Fallback: public profile HTML → JSON-LD/OpenGraph parsing.
 - **Instagram:** Apify actor [`apify/instagram-profile-scraper`](https://apify.com/apify/instagram-profile-scraper): profile, bio, latest posts (captions, hashtags, locations, image URLs). Fallback: Instagram's public `web_profile_info` endpoint. Post images are downloaded server-side and passed to the model as base64 for visual analysis.
-- **Analysis and agents:** Claude (Anthropic SDK, structured outputs) or Gemini (Interactions API), selected by which key is set.
+- **Analysis and agents:** Claude (Anthropic SDK, structured outputs) or Gemini (Interactions API), selected by which key is set. The example run used Claude Sonnet 5.5 for profile analysis and Claude Haiku 5.5 for swipes, dates and debriefs.
 
 ## Run it
 
@@ -67,7 +67,9 @@ npm run seed              # rebuild the example pool from data/people.json (resu
 
 ## Deploy
 
-Any Node 20+ host works. A `render.yaml` blueprint is included: on Render, choose **New → Blueprint**, pick this repo, and set the secret env vars. The example pool ships in `data/seed.json`, so the demo works without running anything.
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/princechoudhary16/proxy-dating)
+
+Any Node 20+ host works. The `render.yaml` blueprint sets everything up; you only paste the secret env vars (`APIFY_TOKEN` plus `ANTHROPIC_API_KEY` or `GEMINI_API_KEY`). The example pool ships in `data/seed.json`, so the demo works without running anything.
 
 ## Ethics
 

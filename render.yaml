@@ -15,7 +15,11 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: ANALYSIS_MODEL
+        value: claude-sonnet-5-5
+      - key: SCREEN_MODEL
+        value: claude-haiku-5-5
+      - key: DATE_MODEL
+        value: claude-haiku-5-5
       - key: DATES_PER_PERSON
         value: "3"
-      - key: GEMINI_RPM
-        value: "12"
