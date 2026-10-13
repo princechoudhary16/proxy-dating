@@ -39,7 +39,11 @@ function normalize(raw, via) {
 async function viaApify(handle) {
   const items = await runActor(config.apify.instagramActor, { usernames: [handle] });
   const item = items.find((i) => i.username?.toLowerCase() === handle) || items[0];
-  if (!item || item.error) throw new Error(item?.errorDescription || item?.error || 'Instagram profile not found');
+  if (!item || item.error) {
+    const why = item?.errorDescription || item?.error || 'Instagram profile not found';
+    if (/not exist|not found|no user/i.test(why)) throw userError(`Instagram @${handle} doesn't exist. Check the username.`);
+    throw new Error(why);
+  }
   return normalize(item, 'apify');
 }
 
