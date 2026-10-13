@@ -3,7 +3,8 @@
  * swipes on everyone else, and goes on dates. Resumable — re-run to continue after a failure.
  *
  *   npm run seed                 full run
- *   npm run seed -- --only-build stop after profiles
+ *   npm run seed -- --scrape-only fetch + cache sources, no LLM calls
+ *   npm run seed -- --only-build  stop after profiles
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -39,6 +40,7 @@ await Promise.all(
           fs.writeFileSync(cacheFile, JSON.stringify(sources));
         }
         if (!sources.identity.verified) throw new Error(`identity not verified (${sources.identity.reason})`);
+        if (args.has('--scrape-only')) return log(`✓ scraped ${sources.linkedin.name} / @${sources.instagram.username}`);
         const person = await buildPerson(null, { sources, origin: 'seed' });
         store.upsertPerson(person);
         store.saveSeed();
@@ -52,7 +54,7 @@ await Promise.all(
 );
 log(`${store.people.size} people ready. ${failures.length} failed.`);
 if (failures.length) console.table(failures);
-if (args.has('--only-build')) process.exit(0);
+if (args.has('--only-build') || args.has('--scrape-only')) process.exit(0);
 
 // 2. Swipe phase for anyone who hasn't swiped yet.
 const all = [...store.people.values()];
