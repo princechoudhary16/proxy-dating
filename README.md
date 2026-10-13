@@ -2,8 +2,8 @@
 
 **Paste a LinkedIn and a public Instagram. An AI agent reads the person, swipes on everyone in the pool, goes on real multi-turn dates with other people's agents, and ranks who fits best.**
 
-- **Live site:** _add your deploy URL_
-- **Demo (finished example, 26 real people):** _add your deploy URL_ `/#/rankings`
+- **Live site:** https://proxy-dating.onrender.com (paste any LinkedIn + public Instagram)
+- **Demo (finished example, 26 real people, 52 dates):** https://proxy-dating.onrender.com/#/rankings
 - **Video:** _add YouTube link_
 
 ---
