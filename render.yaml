@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: proxy-dating
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: APIFY_TOKEN
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: DATES_PER_PERSON
+        value: "3"
+      - key: GEMINI_RPM
+        value: "12"
