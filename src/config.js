@@ -4,13 +4,33 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const int = (v, d) => (Number.isFinite(Number(v)) && v !== '' && v != null ? Number(v) : d);
 
+const anthropicKey = process.env.ANTHROPIC_API_KEY || '';
+const geminiKey = process.env.GEMINI_API_KEY || '';
+const provider = process.env.LLM_PROVIDER || (anthropicKey ? 'anthropic' : geminiKey ? 'gemini' : 'anthropic');
+const DEFAULT_MODELS = {
+  anthropic: { analysis: 'claude-opus-5-5', date: 'claude-opus-5-5' },
+  gemini: { analysis: 'gemini-2.5-flash', date: 'gemini-2.5-flash-lite' },
+};
+
 export const config = {
   root,
   port: int(process.env.PORT, 3000),
   dataDir: path.join(root, 'data'),
-  anthropicKey: process.env.ANTHROPIC_API_KEY || '',
+  anthropicKey,
   apifyToken: process.env.APIFY_TOKEN || '',
-  model: process.env.MODEL || 'claude-opus-5-5',
+  provider,
+  models: {
+    analysis: process.env.ANALYSIS_MODEL || DEFAULT_MODELS[provider]?.analysis,
+    date: process.env.DATE_MODEL || DEFAULT_MODELS[provider]?.date,
+  },
+  gemini: {
+    key: geminiKey,
+    // Free-tier requests-per-minute per model; override with GEMINI_RPM_<MODEL>=n or GEMINI_RPM=n.
+    rpm: new Proxy(
+      {},
+      { get: (_t, m) => int(process.env[`GEMINI_RPM_${String(m).toUpperCase().replace(/[^A-Z0-9]/g, '_')}`], int(process.env.GEMINI_RPM, 9)) }
+    ),
+  },
   analysisEffort: process.env.ANALYSIS_EFFORT || 'medium',
   dateEffort: process.env.DATE_EFFORT || 'low',
   datesPerPerson: int(process.env.DATES_PER_PERSON, 4),
