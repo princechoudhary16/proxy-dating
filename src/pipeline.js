@@ -105,7 +105,8 @@ export async function onboard(links, emit) {
   const others = [...store.people.values()].filter((p) => p.id !== person.id);
   if (others.length) {
     emit({ type: 'step', step: 'screen', status: 'running', detail: `Your agent is swiping through ${others.length} profiles — and they're swiping on you` });
-    await screenAll([person, ...others], [person, ...others].filter(Boolean), () => {}).catch(() => {});
+    // New agent swipes on everyone; every existing agent swipes on the newcomer.
+    await Promise.all([screenAll([person], others), screenAll(others, [person])]);
     emit({ type: 'step', step: 'screen', status: 'done', detail: 'Swipes are in' });
 
     const pairs = selectPairs([person.id]);
