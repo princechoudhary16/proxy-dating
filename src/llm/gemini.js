@@ -10,6 +10,7 @@ import { sleep } from '../util.js';
 const URL = 'https://generativelanguage.googleapis.com/v1beta/interactions';
 const cooldown = new Map(); // model -> timestamp when it may be used again
 const windows = new Map(); // model -> request timestamps in the last minute
+const debug = (...a) => process.env.DEBUG_LLM && console.error('[gemini]', ...a);
 
 function toInput(content) {
   if (typeof content === 'string') return [{ type: 'text', text: content }];
@@ -51,11 +52,13 @@ async function interact(role, body) {
         signal: AbortSignal.timeout(180_000),
       });
     } catch (e) {
+      debug(role, model, 'network', e.message);
       lastErr = e;
       cooldown.set(model, Date.now() + 5_000);
       continue;
     }
     const json = await res.json().catch(() => ({}));
+    debug(role, model, res.status, res.ok ? 'ok' : json.error?.message?.slice(0, 120));
     if (res.ok) {
       const text = (json.steps || [])
         .filter((s) => s.type === 'model_output')
@@ -69,12 +72,22 @@ async function interact(role, body) {
       continue;
     }
     lastErr = new Error(`Gemini ${model}: ${json.error?.message || `HTTP ${res.status}`}`);
-    if (res.status === 429) cooldown.set(model, Date.now() + 60_000);
+    if (res.status === 429) cooldown.set(model, Date.now() + retryAfterMs(json.error?.message));
     else if (res.status === 503 || res.status >= 500) cooldown.set(model, Date.now() + 8_000 * (1 + (attempt % 3)));
     else if (res.status === 404) cooldown.set(model, Date.now() + 3600_000);
     else throw Object.assign(lastErr, { retryable: false });
   }
   throw lastErr;
+}
+
+/** Parse "Please retry in 7h33m8s" / "retry in 4s" hints; daily quotas cool down for hours. */
+function retryAfterMs(msg = '') {
+  const m = msg.match(/retry in ((?:\d+h)?(?:\d+m)?(?:[\d.]+s)?)/i);
+  if (!m) return 60_000;
+  const [, h = 0] = m[1].match(/(\d+)h/) || [];
+  const [, mi = 0] = m[1].match(/(\d+)m(?!s)/) || [];
+  const [, se = 0] = m[1].match(/([\d.]+)s/) || [];
+  return (Number(h) * 3600 + Number(mi) * 60 + Number(se)) * 1000 + 1000;
 }
 
 const thinkingLevel = (effort) => (effort === 'low' ? 'low' : effort === 'high' ? 'high' : 'medium');
