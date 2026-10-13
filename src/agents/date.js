@@ -74,11 +74,23 @@ export async function runDate(a, b, { onMessage = () => {}, onPlan = () => {} } 
     const isLast = i >= turns - 2;
     const messages = toMessages(transcript, speaker, opener, isLast);
     const text = await chat({ system: sys[speaker], messages, effort: config.dateEffort, maxTokens: 2000 });
-    const line = { speaker, text: text.replace(/^["“]|["”]$/g, '') };
+    const line = { speaker, text: cleanLine(text) };
     transcript.push(line);
     onMessage(line);
   }
   return { plan, transcript };
+}
+
+/** Strip stage directions (*smiles*), speaker labels and wrapping quotes some models add. */
+function cleanLine(text) {
+  const spoken = text
+    .replace(/\*[^*]{1,200}\*/g, ' ')
+    .replace(/^\s*(YOU SAID|[A-Z][\w .'-]{1,40}):\s*/, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+    .replace(/^["“]|["”]$/g, '')
+    .trim();
+  return spoken || text.replace(/\*/g, '').trim();
 }
 
 /** Build an alternating user/assistant history from one agent's point of view. */
