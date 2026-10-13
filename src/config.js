@@ -22,6 +22,7 @@ export const config = {
   models: {
     analysis: process.env.ANALYSIS_MODEL || DEFAULT_MODELS[provider]?.analysis,
     date: process.env.DATE_MODEL || DEFAULT_MODELS[provider]?.date,
+    screen: process.env.SCREEN_MODEL || process.env.DATE_MODEL || DEFAULT_MODELS[provider]?.date,
   },
   gemini: {
     key: geminiKey,

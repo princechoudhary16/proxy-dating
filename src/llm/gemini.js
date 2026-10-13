@@ -38,7 +38,7 @@ async function pickModel(chain) {
 }
 
 async function interact(role, body) {
-  const chain = config.gemini.models[role];
+  const chain = config.gemini.models[role] || config.gemini.models.date;
   let lastErr;
   for (let attempt = 0; attempt < 24; attempt++) {
     const model = await pickModel(chain);

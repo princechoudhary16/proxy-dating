@@ -24,7 +24,7 @@ ${dossier(person)}
 
 You are swiping through other agents' profiles on behalf of ${person.name}. Score each candidate 0-100 for how well they would fit ${person.name} as a romantic partner — needs met, values aligned, lifestyle compatible, interesting chemistry potential, dealbreakers avoided. Be discerning: use the full range, most candidates should land between 30 and 75 and only exceptional fits above 85. Do not consider gender or appearance; judge fit only.`;
   const content = `Candidates:\n\n${candidates.map(card).join('\n\n')}\n\nReturn a rating for every candidate id.`;
-  const { ratings } = await structured({ system, content, schema: ScreenSchema, effort: 'low' });
+  const { ratings } = await structured({ system, content, schema: ScreenSchema, effort: 'low', role: 'screen' });
   const valid = new Set(candidates.map((c) => c.id));
   return Object.fromEntries(ratings.filter((r) => valid.has(r.id)).map((r) => [r.id, { score: r.score, reason: r.reason }]));
 }
