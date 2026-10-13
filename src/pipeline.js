@@ -22,8 +22,8 @@ async function avatarDataUri(url) {
 }
 
 /** Step 1+2: read both sources and build the person's agent profile. */
-export async function buildPerson(links, { emit = () => {}, origin = 'user' } = {}) {
-  const sources = await scrapePerson(links, (e) => emit({ type: 'step', ...e }));
+export async function buildPerson(links, { emit = () => {}, origin = 'user', sources } = {}) {
+  sources ??= await scrapePerson(links, (e) => emit({ type: 'step', ...e }));
   const analysis = await analyzePerson(sources, (e) => emit({ type: 'step', ...e }));
   const li = sources.linkedin;
   const ig = sources.instagram;
