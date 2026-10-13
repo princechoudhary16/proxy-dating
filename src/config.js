@@ -45,7 +45,7 @@ export const config = {
   maxConcurrentJobs: int(process.env.MAX_CONCURRENT_JOBS, 2),
   apify: {
     instagramActor: process.env.APIFY_INSTAGRAM_ACTOR || 'apify~instagram-profile-scraper',
-    linkedinActor: process.env.APIFY_LINKEDIN_ACTOR || 'harvestapi~linkedin-profile-scraper',
+    linkedinActors: (process.env.APIFY_LINKEDIN_ACTORS || 'supreme_coder~linkedin-profile-scraper,harvestapi~linkedin-profile-scraper').split(','),
     timeoutSecs: int(process.env.APIFY_TIMEOUT_SECS, 180),
   },
 };

@@ -52,7 +52,7 @@ data/people.json   the 30 candidate people (27 passed scraping + identity checks
 
 ## Scraping tech stack
 
-- **LinkedIn:** Apify actor [`harvestapi/linkedin-profile-scraper`](https://apify.com/harvestapi/linkedin-profile-scraper) (no cookies or login needed), called through Apify's `run-sync-get-dataset-items` REST endpoint from Node `fetch`. Fallback: public profile HTML → JSON-LD/OpenGraph parsing.
+- **LinkedIn:** Apify actors, tried in order: [`supreme_coder/linkedin-profile-scraper`](https://apify.com/supreme_coder/linkedin-profile-scraper), then [`harvestapi/linkedin-profile-scraper`](https://apify.com/harvestapi/linkedin-profile-scraper). Neither needs cookies or a login, called through Apify's `run-sync-get-dataset-items` REST endpoint from Node `fetch`. Fallback: public profile HTML → JSON-LD/OpenGraph parsing.
 - **Instagram:** Apify actor [`apify/instagram-profile-scraper`](https://apify.com/apify/instagram-profile-scraper): profile, bio, latest posts (captions, hashtags, locations, image URLs). Fallback: Instagram's public `web_profile_info` endpoint. Post images are downloaded server-side and passed to the model as base64 for visual analysis.
 - **Analysis and agents:** Claude (Anthropic SDK, structured outputs) or Gemini (Interactions API), selected by which key is set. The example run used Claude Sonnet 5.5 for profile analysis and Claude Haiku 5.5 for swipes, dates and debriefs.
 

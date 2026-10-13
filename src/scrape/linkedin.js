@@ -2,7 +2,8 @@ import { config } from '../config.js';
 import { runActor } from './apify.js';
 import { truncate, retry } from '../util.js';
 
-const fmtDate = (d) => (!d ? null : typeof d === 'string' ? d : d.text || [d.month, d.year].filter(Boolean).join(' ') || null);
+const fmtDate = (d) => (!d ? null : typeof d === 'string' ? d : d.text || [d.month, d.year].filter(Boolean).join('/') || null);
+const companyName = (e) => (typeof e.company === 'object' ? e.company?.name : e.company) || e.companyName || e.subtitle || null;
 
 /** Normalised LinkedIn shape. Tolerant of the field names used by the common Apify LinkedIn actors. */
 function normalize(raw, via) {
@@ -18,29 +19,30 @@ function normalize(raw, via) {
     about: truncate(raw.about || raw.summary || '', 3000),
     location:
       (typeof raw.location === 'string' ? raw.location : raw.location?.linkedinText) ||
+      raw.geoLocationName ||
       raw.addressWithCountry ||
       raw.geoLocationName ||
       null,
     followers: raw.followerCount ?? raw.followers ?? null,
-    photo: raw.photo || raw.profilePicture || raw.profilePic || null,
+    photo: raw.photo || raw.pictureUrl || raw.profilePicture || raw.profilePic || null,
     experience: list(exp, (e) => ({
       title: e.position || e.title || null,
-      company: e.companyName || e.company || e.subtitle || null,
-      start: fmtDate(e.startDate || e.starts_at),
-      end: fmtDate(e.endDate || e.ends_at) || (e.endDate === null ? 'Present' : null),
-      location: e.location || null,
+      company: companyName(e),
+      start: fmtDate(e.startDate || e.starts_at || e.timePeriod?.startDate),
+      end: fmtDate(e.endDate || e.ends_at || e.timePeriod?.endDate) || (e.endDate === null || e.timePeriod?.endDate === null ? 'Present' : null),
+      location: e.location || e.locationName || null,
       description: truncate(e.description || '', 500),
     })).slice(0, 15),
     education: list(edu, (e) => ({
-      school: e.schoolName || e.school || e.title || null,
+      school: e.schoolName || (typeof e.school === 'object' ? e.school?.schoolName || e.school?.name : e.school) || e.title || null,
       degree: [e.degree || e.degreeName, e.fieldOfStudy].filter(Boolean).join(', ') || null,
-      period: [fmtDate(e.startDate), fmtDate(e.endDate)].filter(Boolean).join(' – ') || e.period || null,
+      period: [fmtDate(e.startDate || e.timePeriod?.startDate), fmtDate(e.endDate || e.timePeriod?.endDate)].filter(Boolean).join(' – ') || e.period || null,
     })).slice(0, 8),
     skills: list(raw.skills, (s) => (typeof s === 'string' ? s : s.name || s.title)).slice(0, 40),
     languages: list(raw.languages, (l) => (typeof l === 'string' ? l : l.name || l.title)),
     certifications: list(raw.certifications, (c) => c.title || c.name).slice(0, 10),
-    volunteering: list(raw.volunteering || raw.volunteerExperience, (v) =>
-      [v.role || v.title, v.organizationName || v.companyName || v.subtitle].filter(Boolean).join(' @ ')
+    volunteering: list(raw.volunteering || raw.volunteerExperience || raw.volunteerExperiences, (v) =>
+      [v.role || v.title, v.organizationName || v.companyName || v.company?.name || v.subtitle].filter(Boolean).join(' @ ')
     ).slice(0, 10),
     honors: list(raw.honorsAndAwards || raw.honors, (h) => h.title || h.name).slice(0, 10),
     publications: list(raw.publications, (p) => p.title || p.name).slice(0, 10),
@@ -48,16 +50,27 @@ function normalize(raw, via) {
   };
 }
 
+// LinkedIn actors in priority order; each has its own input shape. Override with APIFY_LINKEDIN_ACTORS.
+const ACTOR_INPUTS = {
+  'supreme_coder~linkedin-profile-scraper': (url) => ({ urls: [{ url }] }),
+  'harvestapi~linkedin-profile-scraper': (url) => ({ profileScraperMode: 'Profile details no email ($4 per 1k)', urls: [url] }),
+};
+
 async function viaApify(handle) {
-  const items = await runActor(config.apify.linkedinActor, {
-    profileScraperMode: 'Profile details no email ($4 per 1k)',
-    urls: [`https://www.linkedin.com/in/${handle}/`],
-    queries: [`https://www.linkedin.com/in/${handle}/`],
-  });
-  const item = items.find((i) => !i.error) || items[0];
-  if (!item || item.error || !(item.firstName || item.fullName || item.name))
-    throw new Error(item?.error || 'LinkedIn profile not found');
-  return normalize(item, 'apify');
+  const url = `https://www.linkedin.com/in/${handle}/`;
+  const errors = [];
+  for (const actor of config.apify.linkedinActors) {
+    try {
+      const build = ACTOR_INPUTS[actor] || ((u) => ({ urls: [u] }));
+      const items = await runActor(actor, build(url));
+      const item = items.find((i) => !i.error && (i.firstName || i.fullName || i.name)) || items[0];
+      if (!item || item.error || !(item.firstName || item.fullName || item.name)) throw new Error(item?.error || 'profile not found');
+      return normalize(item, `apify:${actor.split('~')[0]}`);
+    } catch (e) {
+      errors.push(`${actor.split('~')[0]}: ${e.message.slice(0, 120)}`);
+    }
+  }
+  throw new Error(errors.join(' ; '));
 }
 
 /** Fallback: public profile HTML → JSON-LD/OG meta. LinkedIn often serves an authwall to datacenter IPs. */
