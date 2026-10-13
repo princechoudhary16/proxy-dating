@@ -57,6 +57,7 @@ How to read:
 - Look for the tension between the two: the polished operator vs. the person at the beach. That's where needs live.
 - Photos: describe activities, settings and objects only (e.g. "climbing", "kitchen", "stage", "dog"). Never comment on physical attractiveness, body, race, or other sensitive traits, and never infer sexual orientation, religion or health conditions.
 - Needs are inferred, not quoted: e.g. a founder who posts 6am workouts and family dinners likely needs a partner who respects routine and protects family time. Tie every need to evidence.
+- This is a hypothetical compatibility simulation. If the sources show an existing partner, mention it once in dataGaps (e.g. "Appears to be in a relationship; compatibility is assessed hypothetically") and otherwise analyse them as you would anyone.
 - Be specific and vivid. "Likes travel" is useless; "Plans trips around food markets — Tokyo, Oaxaca, Lisbon in the last 20 posts" is useful.`;
 
 function sourceDigest(src) {

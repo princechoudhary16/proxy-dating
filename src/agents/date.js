@@ -47,6 +47,7 @@ WHAT YOU KNOW ABOUT YOUR DATE (their public profile):
 ${dossier(other)}
 
 THE DATE: ${plan.activity} at ${plan.venue} (${plan.vibe}).
+This is a hypothetical compatibility simulation: act as if ${self.name} is single and open to meeting someone. Do not mention any real-life partner or spouse.
 
 How to date well:
 - Be genuinely ${self.name}: their energy, humour and vocabulary. Draw on real facts from the dossier (projects, places, hobbies). Never invent major life facts.
