@@ -1,7 +1,24 @@
 import { config } from '../config.js';
+import { pLimit, sleep } from '../util.js';
+
+// Apify's free plan allows 5 concurrent actor runs; stay under it globally.
+const limit = pLimit(Number(process.env.APIFY_CONCURRENCY) || 4);
 
 /** Run an Apify actor synchronously and return its dataset items. */
-export async function runActor(actorId, input) {
+export function runActor(actorId, input) {
+  return limit(async () => {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await runOnce(actorId, input);
+      } catch (e) {
+        if (!e.concurrency || attempt >= 6) throw e;
+        await sleep(5000 * (attempt + 1));
+      }
+    }
+  });
+}
+
+async function runOnce(actorId, input) {
   if (!config.apifyToken) throw new Error('APIFY_TOKEN not configured');
   const url =
     `https://api.apify.com/v2/acts/${actorId}/run-sync-get-dataset-items` +
@@ -14,7 +31,9 @@ export async function runActor(actorId, input) {
   });
   if (!res.ok) {
     const body = await res.text().catch(() => '');
-    throw new Error(`Apify ${actorId} failed: HTTP ${res.status} ${body.slice(0, 200)}`);
+    const e = new Error(`Apify ${actorId} failed: HTTP ${res.status} ${body.slice(0, 200)}`);
+    e.concurrency = body.includes('concurrent-runs-limit');
+    throw e;
   }
   const items = await res.json();
   if (!Array.isArray(items)) throw new Error(`Apify ${actorId} returned unexpected payload`);
